@@ -1,0 +1,76 @@
+from src.numberwriter import NumberToWords
+
+
+def test_convert():
+    # Test cases for the convertir function
+    test_cases = [
+        (0, "CERO Y 00/100 SOLES"),
+        (1, "UNO Y 00/100 SOLES"),
+        (2, "DOS Y 00/100 SOLES"),
+        (3, "TRES Y 00/100 SOLES"),
+        (4.50, "CUATRO Y 50/100 SOLES"),
+        (5.89, "CINCO Y 89/100 SOLES"),
+        (6, "SEIS Y 00/100 SOLES"),
+        (7, "SIETE Y 00/100 SOLES"),
+        (8, "OCHO Y 00/100 SOLES"),
+        (9, "NUEVE Y 00/100 SOLES"),
+        (10, "DIEZ Y 00/100 SOLES"),
+        (11, "ONCE Y 00/100 SOLES"),
+        (12, "DOCE Y 00/100 SOLES"),
+        (13, "TRECE Y 00/100 SOLES"),
+        (14, "CATORCE Y 00/100 SOLES"),
+        (15, "QUINCE Y 00/100 SOLES"),
+        (16, "DIECISEIS Y 00/100 SOLES"),
+        (20, "VEINTE Y 00/100 SOLES"),
+        (21, "VEINTIUNO Y 00/100 SOLES"),
+        (22, "VEINTIDOS Y 00/100 SOLES"),
+        (30, "TREINTA Y 00/100 SOLES"),
+        (31, "TREINTIUNO Y 00/100 SOLES"),
+        (40, "CUARENTA Y 00/100 SOLES"),
+        (90, "NOVENTA Y 00/100 SOLES"),
+        (100, "CIEN Y 00/100 SOLES"),
+        (101, "CIENTO UNO Y 00/100 SOLES"),
+        (200, "DOSCIENTOS Y 00/100 SOLES"),
+        (333, "TRESCIENTOS TREINTITRES Y 00/100 SOLES"),
+        (1000, "MIL Y 00/100 SOLES"),
+        (2000, "DOS MIL Y 00/100 SOLES"),
+        (3333, "TRES MIL TRESCIENTOS TREINTITRES Y 00/100 SOLES"),
+        (4000, "CUATRO MIL Y 00/100 SOLES"),
+        (5000, "CINCO MIL Y 00/100 SOLES"),
+        (6000, "SEIS MIL Y 00/100 SOLES"),
+        (7000, "SIETE MIL Y 00/100 SOLES"),
+        (8000, "OCHO MIL Y 00/100 SOLES"),
+        (9000, "NUEVE MIL Y 00/100 SOLES"),
+        (16000, "DIECISEIS MIL Y 00/100 SOLES"),
+        (20000, "VEINTE MIL Y 00/100 SOLES"),
+        (30000, "TREINTA MIL Y 00/100 SOLES"),
+        (40000, "CUARENTA MIL Y 00/100 SOLES"),
+        (50000, "CINCUENTA MIL Y 00/100 SOLES"),
+        (60000, "SESENTA MIL Y 00/100 SOLES"),
+        (70000, "SETENTA MIL Y 00/100 SOLES"),
+        (80000, "OCHENTA MIL Y 00/100 SOLES"),
+        (90000, "NOVENTA MIL Y 00/100 SOLES"),
+        (100000, "CIEN MIL Y 00/100 SOLES"),
+        (500000, "QUINIENTOS MIL Y 00/100 SOLES"),
+        (900000, "NOVECIENTOS MIL Y 00/100 SOLES"),
+        (1600000, "UN MILLON SEISCIENTOS MIL Y 00/100 SOLES"),
+        (2000000, "DOS MILLONES Y 00/100 SOLES"),
+        (2000000.50, "DOS MILLONES Y 50/100 SOLES"),
+        (3000000, "TRES MILLONES Y 00/100 SOLES"),
+        (4000000, "CUATRO MILLONES Y 00/100 SOLES"),
+        (5000000, "CINCO MILLONES Y 00/100 SOLES"),
+        (
+            9493516,
+            "NUEVE MILLONES CUATROCIENTOS NOVENTITRES MIL QUINIENTOS DIECISEIS Y 00/100 SOLES",
+        ),
+        (
+            15999999,
+            "QUINCE MILLONES NOVECIENTOS NOVENTINUEVE MIL NOVECIENTOS NOVENTINUEVE Y 00/100 SOLES",
+        ),
+    ]
+
+    # Create an instance of the NumbertoWords class
+    number_to_words = NumberToWords()
+    # Iterate through the test cases and assert the expected output
+    for input_value, expected_output in test_cases:
+        assert number_to_words.convert(input_value) == expected_output
