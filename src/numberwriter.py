@@ -61,19 +61,6 @@ class NumberToWords:
             "NOVECIENTOS ",
             "MIL ",
         ]
-        self.millares = [
-            "",
-            "MIL ",
-            "DOS MIL ",
-            "TRES MIL ",
-            "CUATRO MIL ",
-            "CINCO MIL ",
-            "SEIS MIL ",
-            "SIETE MIL ",
-            "OCHO MIL ",
-            "NUEVE MIL ",
-            "DIECISEIS MIL ",
-        ]
 
     def validate_number(self, number):
         if isinstance(number, str):
@@ -84,27 +71,33 @@ class NumberToWords:
                 return False
         return isinstance(number, (int, float))
 
+    def get_prefix(self, number):
+        if number < 0:
+            return "MENOS "
+        elif number < 1:
+            return "CERO "
+        return ""
+
+    def clean_spaces(self, text):
+        text = re.sub(r"\s+", " ", text)  # Replace multiple spaces with a single space
+        return text.strip()  # Remove leading and trailing spaces
+
     def convert(self, number):
         if not self.validate_number(number):
             raise ValueError("El número no es válido")
 
-        prefix = ""
-        if number < 0:
-            prefix = "MENOS "
-            number = abs(number)
-        elif number < 1:
-            prefix = "CERO "
-        result = prefix + self.convertir(number)
-        result = re.sub(
-            r"\s+", " ", result
-        )  # Replace multiple spaces with a single space
-        return result.strip()  # Remove leading and trailing spaces
+        prefix = self.get_prefix(number)
+        result = prefix + self.convertir(abs(number))
+        return self.clean_spaces(result)
+
+    def get_suffix_and_currency(self, number):
+        number = round(number, 2)
+        number = int(number * 100)
+        return f" Y {number:02}/100 {self.moneda}"
 
     def convertir(self, number):
         if number < 1:
-            number = round(number, 2)
-            number = int(number * 100)
-            return f" Y {number:02}/100 {self.moneda}"
+            return self.get_suffix_and_currency(number)
         elif 0 < number < 16:
             return self.unidades(number)
         elif number < 101:
@@ -119,11 +112,15 @@ class NumberToWords:
             return self.cienmiles(1, number)
         elif number < 16000000:
             return self.millones(1, number)
+        elif number < 1000000000:
+            raise ValueError(
+                "El número es demasiado grande. El límite es 15,999,999.99"
+            )
 
-        return ""
+        return False
 
     def unidades(self, number):
-        if number == 1:
+        if int(number) == 1:
             prefix = "UNO"
         else:
             prefix = self.quincenas[int(number)]
@@ -207,7 +204,24 @@ class NumberToWords:
 
 if __name__ == "__main__":
     number_to_words = NumberToWords()
-    for index in range(1, 5):
-        number = round(random.uniform(0, 1999999), 2)
-        print(f"Random number: {number}")
-        print(f"Number in words: {number_to_words.convert(number)}")
+    number = round(random.uniform(0, 100), 2)
+    print(f"Random number: {number}")
+    print(f"Number in words: {number_to_words.convert(number)}")
+    number = round(random.uniform(101, 1001), 2)
+    print(f"Random number: {number}")
+    print(f"Number in words: {number_to_words.convert(number)}")
+    number = round(random.uniform(1001, 10000), 2)
+    print(f"Random number: {number}")
+    print(f"Number in words: {number_to_words.convert(number)}")
+    number = round(random.uniform(10001, 100000), 2)
+    print(f"Random number: {number}")
+    print(f"Number in words: {number_to_words.convert(number)}")
+    number = round(random.uniform(100001, 1000000), 2)
+    print(f"Random number: {number}")
+    print(f"Number in words: {number_to_words.convert(number)}")
+    number = round(random.uniform(1000001, 10000000), 2)
+    print(f"Random number: {number}")
+    print(f"Number in words: {number_to_words.convert(number)}")
+    number = round(random.uniform(10000001, 15999999), 2)
+    print(f"Random number: {number}")
+    print(f"Number in words: {number_to_words.convert(number)}")

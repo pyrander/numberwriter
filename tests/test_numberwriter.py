@@ -27,6 +27,7 @@ def test_convert():
         (30, "TREINTA Y 00/100 SOLES"),
         (31, "TREINTIUNO Y 00/100 SOLES"),
         (40, "CUARENTA Y 00/100 SOLES"),
+        (41.7, "CUARENTIUNO Y 70/100 SOLES"),
         (90, "NOVENTA Y 00/100 SOLES"),
         (100, "CIEN Y 00/100 SOLES"),
         (101, "CIENTO UNO Y 00/100 SOLES"),
