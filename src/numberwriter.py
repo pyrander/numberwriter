@@ -1,10 +1,14 @@
 import re
+import math
 import random
 import time
 
 
 class NumberToWords:
     def __init__(self):
+        self.negativePrefix = "MENOS "
+        self.zeroPrefix = "CERO "
+        self.onePrefix = "UNO"
         self.thousandsInfix = " MIL "
         self.millionInfix = " MILLON "
         self.millionsInfix = " MILLONES "
@@ -77,10 +81,88 @@ class NumberToWords:
 
     def get_prefix(self, number):
         if number < 0:
-            return "MENOS "
+            prefix = self.negativePrefix
         elif number < 1:
-            return "CERO "
-        return ""
+            prefix = self.zeroPrefix
+        else:
+            prefix = ""
+        return prefix
+
+    def fix_threshold(self, number, threshold):
+        #threshold can't be less than 1
+        if threshold == 1:
+            return threshold
+        # there need to be fixes for numbers between 10 and 15
+        # for numbers between 10001 and 15999 and 100001 and 101000
+        # and 10000001 and 15999999 and 100000001 and 101000000
+        specialcase = False
+        if (
+            number == threshold
+            or 10 < number < 16
+            or 10000 < number < 16000
+            or 100000 < number < 101000
+            or 10000000 < number < 16000000
+            or 100000000 < number < 101000000
+            
+        ):
+            specialcase = True
+
+        if specialcase:
+            return int(threshold / 10)
+        return threshold
+
+    def get_prefix_and_remainder(self, number, top=False):
+        prefix = ""
+        # Get the power of 10 for the number needed to determine index
+        # and the threshold for the number
+        power = int(math.log10(int(number)))
+        # Get the threshold for the number, its the closest power of 10
+        # that is less than the number
+        threshold = int(math.pow(10, power))
+        # Fix the threshold for special cases
+        threshold = self.fix_threshold(number, threshold)
+        # Get the index for the number, its the number divided by the threshold
+        index = int(number / threshold)
+        # Get the remainder for the number, its the number modulo the threshold
+        remainder = number - int(number) if number < 16 else number % threshold
+        if 1 <= number < 16:
+            if index == 1:
+                prefix = self.onePrefix
+            else:
+                prefix = self.quincenas[index]
+        elif number < 101:
+            if int(remainder) == 0:
+                prefix = self.decenas[index]
+            else:
+                prefix = self.decenarios[index]
+        elif number < 1001:
+            prefix = self.centenas[index]
+        elif number < 16000:
+            if index == 1 and top:
+                index = 0
+            prefix = self.quincenas[index] + self.thousandsInfix
+        elif number < 101000:
+            if int(remainder / 1000) == 0:
+                prefix = self.decenas[index] + self.thousandsInfix
+            else:
+                prefix = self.decenarios[index]
+        elif number < 1000000:
+            prefix = self.centenas[index]
+            if int(remainder / 1000) == 0:
+                prefix += self.thousandsInfix
+        elif number < 16000000:
+            if index == 1 and top:
+                infix = self.millionInfix
+            else:
+                infix = self.millionsInfix
+            prefix = self.quincenas[index] + infix
+        elif number < 101000000:
+            if int(remainder / 1000000) == 0:
+                prefix = self.decenas[index] + self.millionsInfix
+            else:
+                prefix = self.decenarios[index]
+
+        return {"prefix": prefix, "remainder": remainder}
 
     def clean_spaces(self, text):
         text = re.sub(r"\s+", " ", text)  # Replace multiple spaces with a single space
@@ -102,94 +184,26 @@ class NumberToWords:
     def convertir(self, number, top=False):
         if number < 1:
             return self.get_suffix_and_currency(number)
-        elif 0 < number < 16:
-            return self.unidades(number)
-        elif number < 101:
-            return self.diesmos(number)
-        elif number < 1001:
-            return self.cientos(number)
-        elif number < 16000:
-            return self.miles(number, top)
-        elif number < 101000:
-            return self.diezmiles(number)
-        elif number < 1000000:
-            return self.cienmiles(number)
-        elif number < 16000000:
-            return self.millones(number, top)
-        elif number < 101000000:
-            return self.diezmillones(number)
+        elif 1 <= number < 101000000:
+            data = self.get_prefix_and_remainder(number, top)
+            prefix = data.get("prefix")
+            remainder = data.get("remainder")
+            return prefix + self.convertir(remainder)
+        elif number >= 101000000:
+            raise ValueError("El número es demasiado grande")
 
         return ""
 
-    def unidades(self, number):
-        if int(number) == 1:
-            prefix = "UNO"
-        else:
-            prefix = self.quincenas[int(number)]
-        return prefix + self.convertir(number - int(number))
-
-    def diesmos(self, number):
-        index = int(number / 10)
-        remainder = number % 10
-        if int(remainder) == 0:
-            prefix = self.decenas[index]
-        else:
-            prefix = self.decenarios[index]
-        return prefix + self.convertir(remainder)
-
-    def cientos(self, number):
-        index = int(number / 100)
-        remainder = number % 100
-        prefix = self.centenas[index]
-        return prefix + self.convertir(remainder)
-
-    def miles(self, number, top):
-        index = int(number / 1000)
-        remainder = number % 1000
-        if index == 1 and top:
-            index = 0
-        prefix = self.quincenas[index] + self.thousandsInfix
-        return prefix + self.convertir(remainder)
-
-    def diezmiles(self, number):
-        index = int(number / 10000)
-        remainder = number % 10000
-        if int(remainder / 1000) == 0:
-            prefix = self.decenas[index] + self.thousandsInfix
-        else:
-            prefix = self.decenarios[index]
-        return prefix + self.convertir(remainder)
-
-    def cienmiles(self, number):
-        index = int(number / 100000)
-        remainder = number % 100000
-        prefix = self.centenas[index]
-        if int(remainder / 1000) == 0:
-            prefix += self.thousandsInfix
-        return prefix + self.convertir(remainder)
-
-    def millones(self, number, top):
-        index = int(number / 1000000)
-        remainder = number % 1000000
-        if index == 1 and top:
-            infix = self.millionInfix
-        else:
-            infix = self.millionsInfix
-
-        prefix = self.quincenas[index] + infix
-        return prefix + self.convertir(remainder)
-
-    def diezmillones(self, number):
-        index = int(number / 10000000)
-        remainder = number % 10000000
-        if int(remainder / 1000000) == 0:
-            prefix = self.decenas[index] + self.millionsInfix
-        else:
-            prefix = self.decenarios[index]
-        return prefix + self.convertir(remainder)
-
 
 if __name__ == "__main__":
+    """
+    number_to_words = NumberToWords()
+    print(f"Number in words: {number_to_words.convert(15999999)}")
+    print(f"Number in words: {number_to_words.convert(15999)}")
+    print(f"Number in words: {number_to_words.convert(15)}")
+    print(f"Number in words: {number_to_words.convert(0)}")
+    """
+
     start_time = time.time()
     number_to_words = NumberToWords()
     number = round(random.uniform(0, 100), 2)
